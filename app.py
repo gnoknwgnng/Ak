@@ -7,7 +7,7 @@ import requests
 import textwrap
 
 # Set Hugging Face API Key
-API_KEY = "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"  # Replace with your API key
+API_KEY = "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"  # Replace with your API key
 API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
 headers = {"Authorization": f"Bearer {API_KEY}"}
 
