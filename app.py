@@ -1,8 +1,11 @@
-# Import necessary libraries
+# Install necessary libraries
+!pip install requests PyPDF2 streamlit
+
+# Import libraries
+import streamlit as st
 import requests
 import textwrap
 from PyPDF2 import PdfReader
-import streamlit as st
 
 # Set Hugging Face API Key
 API_KEY = "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"  # Replace with your API key
@@ -18,8 +21,8 @@ def summarize_text(text):
     else:
         return f"Error: {response.status_code}, {response.text}"
 
-# Function to split the text into smaller chunks
-def split_text_into_chunks(text, max_length=5000):  # Increased chunk size
+# Function to split the text into larger chunks
+def split_text_into_chunks(text, max_length=5000):  # Increase chunk size
     return textwrap.wrap(text, max_length)
 
 # Function to summarize large documents
@@ -37,40 +40,25 @@ def summarize_large_document(document_text):
     return summarized_text
 
 # Function to extract text from a PDF
-def extract_text_from_pdf(pdf_file):
-    reader = PdfReader(pdf_file)
+def extract_text_from_pdf(pdf_path):
+    reader = PdfReader(pdf_path)
     text = ""
     for page in reader.pages:
         text += page.extract_text()
     return text
 
-# Streamlit user interface
-def main():
-    # Set up the app layout
-    st.title("PDF Summarizer")
-    st.markdown("Upload a PDF document (up to 200 pages) and get a summarized version.")
-    
-    # File uploader widget
-    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
-    
-    # If the user uploads a file
-    if uploaded_file is not None:
-        # Show the file name
-        st.write(f"Processing file: {uploaded_file.name}")
-        
-        # Extract text from the uploaded PDF file
-        document_text = extract_text_from_pdf(uploaded_file)
+# Streamlit app
+st.title("PDF Summarizer")
+st.write("Upload a PDF document to get a summarized version.")
 
-        # Check if the document text is too large (roughly estimated for very large PDFs)
-        if len(document_text) > 1_000_000:
-            st.warning("This document is very large and may take a while to process.")
-        
-        # Summarize the extracted text
+# File upload section
+uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+
+if uploaded_file is not None:
+    document_text = extract_text_from_pdf(uploaded_file)
+    if len(document_text) > 1_000_000:  # Warn for extremely large documents
+        st.warning("This document is too large and may take a long time to summarize.")
+    else:
         final_summary = summarize_large_document(document_text)
-        
-        # Show the summarized text in a text area
-        st.text_area("Summarized Text", final_summary, height=400)
-
-# Run the Streamlit app
-if __name__ == "__main__":
-    main()
+        st.subheader("Summary")
+        st.text(final_summary)
